@@ -2,7 +2,7 @@ name: CI1 Continuous Integration
 
 on:
   push:
-    branches: [ "**" ]
+    branches: [ "feature-mailDevSass-EmailSaasTest" ]
   pull_request:
     branches: [ "main" ]
 
