@@ -52,10 +52,12 @@ The SaaS Email Campaign Platform is a business-to-business (B2B) software soluti
 *   Campaign Management and Data Segregation.
 *   Email Template Configuration and Sending (Manual/Auto).
 *   Performance Dashboard.
+*   **AI Integration:** Multi-Chat system allowing users to engage with free tier LLMs (Llama, Mistral, Gemini) contextually.
+*   **Generative UI:** Text-to-Image client landing page generation via Nano Banana API.
+*   **Video & Meeting Tools:** Automatic Meet scheduling based on hot/cold email sentiment. Video scripting and meeting video transcription generation (replacing general audio integration).
 
 ### Out-of-Scope:
 *   Inbound email server (handling replies within the app, though response tracking is included).
-*   Advanced AI-driven content generation for emails (v1).
 *   Social media marketing integration.
 
 ## 7. Success Metrics (KPIs)
