@@ -1,0 +1,35 @@
+name: Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to rollback to (e.g. git commit SHA or tag)'
+        required: true
+        default: 'previous'
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.event.inputs.version }}
+
+    - name: Rollback Deployment
+      run: |
+        echo "Rolling back to version ${{ github.event.inputs.version }}"
+        # Placeholder for actual rollback logic
+        # Example: supabase db rollback or re-deploying previous docker image
+        echo "Successfully rolled back to ${{ github.event.inputs.version }}"
+
+  # Automatic rollback logic can be simulated by a job that triggers on failure of CD
+  auto-rollback:
+    runs-on: ubuntu-latest
+    if: failure()
+    needs: [rollback] # This is just to show structure, normally it would need the CD job
+    steps:
+      - name: Automatic Rollback on Failure
+        run: |
+          echo "CD failed, triggering automatic rollback..."
+          # Logic to revert to last known good state

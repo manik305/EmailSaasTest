@@ -38,6 +38,12 @@ The SaaS Email Campaign Platform is a professional solution for managing and exe
     *   **Manual Mode:** Users can review and trigger each email draft.
     *   **Automatic Mode:** System automatically sends emails based on the campaign schedule and template.
 
+### 3.5. AI & Meeting Integrations
+*   **Multi-Chat System:** A robust ChatGPT-like interface allowing users to converse with multiple free LLMs (Llama, Mistral, Gemini) contextually regarding the ongoing campaigns.
+*   **Generative UI (Nano Banana):** Taking plain text from the user to generate ad-hoc images.
+*   **Meeting Scheduler (Google Meet):** Automated Google Calendar/Meet invites triggered by hot/cold email responses.
+*   **Video Scripting & Transcripts:** Generation of meeting video descriptions/scripts prior to calls, and transcription of the meeting video once completed (replaces former standalone audio integrations).
+
 ## 4. User Interface Requirements
 
 ### 4.1. Login Page
