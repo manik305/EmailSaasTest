@@ -1,7 +1,7 @@
 fastapi
 uvicorn
-sqlalchemy
-psycopg2-binary
+beanie
+motor
 pydantic
 python-jose[cryptography]
 passlib[bcrypt]
@@ -12,9 +12,8 @@ boto3
 python-dotenv
 openai
 httpx
-<<<<<<< HEAD
-=======
 pytest
 pytest-asyncio
 pytest-cov
->>>>>>> 08608f188715ba27b2d9f2322e406d0d257d4baf
+python-multipart
+aiomail  # for async email if needed, or stick to smtplib/imaplib

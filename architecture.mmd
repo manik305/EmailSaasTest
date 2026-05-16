@@ -1,0 +1,46 @@
+graph TD
+    subgraph "Frontend (React + Vite)"
+        UI[User Interface]
+        AC[AppContext - State Management]
+        CS[Campaign Service]
+        DS[Data Service]
+    end
+
+    subgraph "Backend (FastAPI)"
+        API[API Router]
+        Auth[JWT Auth Service]
+        EM[Email Manager - SMTP/IMAP]
+        VM[Voice Manager - Vapi/Twilio]
+        SM[Social Media Manager]
+    end
+
+    subgraph "Database (MongoDB)"
+        DB[(MongoDB Atlas)]
+        BM[Beanie ODM]
+    end
+
+    subgraph "External Integrations"
+        SMTP[SMTP Servers]
+        IMAP[IMAP Servers]
+        Vapi[Vapi AI Voice]
+        Social[LinkedIn/Meta APIs]
+    end
+
+    UI <--> AC
+    AC <--> CS
+    AC <--> DS
+    CS <--> API
+    DS <--> API
+    
+    API <--> Auth
+    API <--> BM
+    BM <--> DB
+    
+    API <--> EM
+    API <--> VM
+    API <--> SM
+    
+    EM <--> SMTP
+    EM <--> IMAP
+    VM <--> Vapi
+    SM <--> Social

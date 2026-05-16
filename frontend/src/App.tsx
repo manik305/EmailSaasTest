@@ -7,6 +7,8 @@ import EmailConfigPage from './pages/EmailConfig';
 import LoginPage from './pages/Login';
 import LandingPageFeature from './pages/LandingPage';
 import MeetingScheduler from './pages/MeetingScheduler';
+import VoiceManager from './pages/VoiceManager';
+import SocialMedia from './pages/SocialMedia';
 import { Chatbot } from './components/Chatbot';
 
 const navIcons: Record<string, React.ReactNode> = {
@@ -30,14 +32,24 @@ const navIcons: Record<string, React.ReactNode> = {
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
     </svg>
   ),
-  '/landing-pages': (
+  '/voice-manager': (
     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+    </svg>
+  ),
+  '/social-media': (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
     </svg>
   ),
   '/meetings': (
     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+    </svg>
+  ),
+  '/landing-pages': (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
     </svg>
   ),
 };
@@ -49,9 +61,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     { name: 'Dashboard', path: '/dashboard' },
     { name: 'Campaigns', path: '/campaigns' },
     { name: 'Data Management', path: '/data-folder' },
+    { name: 'Voice Manager', path: '/voice-manager' },
+    { name: 'Social Hub', path: '/social-media' },
     { name: 'Email Config', path: '/email-config' },
-    { name: 'Landing Pages', path: '/landing-pages' },
     { name: 'Meetings', path: '/meetings' },
+    { name: 'Landing Pages', path: '/landing-pages' },
   ];
 
   return (
@@ -117,6 +131,8 @@ const App: React.FC = () => {
         <Route path="/email-config" element={<Layout><EmailConfigPage /></Layout>} />
         <Route path="/landing-pages" element={<Layout><LandingPageFeature /></Layout>} />
         <Route path="/meetings" element={<Layout><MeetingScheduler /></Layout>} />
+        <Route path="/voice-manager" element={<Layout><VoiceManager /></Layout>} />
+        <Route path="/social-media" element={<Layout><SocialMedia /></Layout>} />
       </Routes>
     </BrowserRouter>
   );

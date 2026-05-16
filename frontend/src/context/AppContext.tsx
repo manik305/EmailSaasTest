@@ -10,15 +10,19 @@ interface UploadedFile {
 }
 
 interface Recipient {
-  id: number;
+  id: string;
   email: string;
-  name: string;
+  name?: string;
+  designation?: string;
+  department?: string;
+  industry?: string;
+  region?: string;
   status: string;
   created_at: string;
 }
 
 interface Campaign {
-  id: number;
+  id: string;
   name: string;
   target_segment: string;
   schedule: string;

@@ -1,14 +1,13 @@
-from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, UploadFile, File, HTTPException
 import pandas as pd
 import io
-from ..database import get_db
 from .. import models, schemas
+from typing import List
 
 router = APIRouter()
 
 @router.post("/upload", response_model=dict)
-async def upload_data(file: UploadFile = File(...), db: Session = Depends(get_db)):
+async def upload_data(file: UploadFile = File(...)):
     content = await file.read()
     
     try:
@@ -19,9 +18,13 @@ async def upload_data(file: UploadFile = File(...), db: Session = Depends(get_db
         else:
             raise HTTPException(status_code=400, detail="Unsupported file format")
             
-        # Basic normalization: find 'email' and 'name' columns
+        # Normalization
         email_col = next((c for c in df.columns if 'email' in c.lower()), None)
         name_col = next((c for c in df.columns if 'name' in c.lower()), None)
+        des_col = next((c for c in df.columns if 'designation' in c.lower()), None)
+        dep_col = next((c for c in df.columns if 'department' in c.lower()), None)
+        ind_col = next((c for c in df.columns if 'industry' in c.lower()), None)
+        reg_col = next((c for c in df.columns if 'region' in c.lower() or 'state' in c.lower()), None)
         
         if not email_col:
             raise HTTPException(status_code=400, detail="Could not find an email column")
@@ -32,21 +35,25 @@ async def upload_data(file: UploadFile = File(...), db: Session = Depends(get_db
             if not email or '@' not in email:
                 continue
                 
-            name = str(row[name_col]).strip() if name_col else ""
-            
             # Check if exists
-            existing = db.query(models.Recipient).filter(models.Recipient.email == email).first()
+            existing = await models.Recipient.find_one(models.Recipient.email == email)
             if not existing:
-                new_recipient = models.Recipient(email=email, name=name)
-                db.add(new_recipient)
+                new_recipient = models.Recipient(
+                    email=email,
+                    name=str(row[name_col]).strip() if name_col else None,
+                    designation=str(row[des_col]).strip() if des_col else None,
+                    department=str(row[dep_col]).strip() if dep_col else None,
+                    industry=str(row[ind_col]).strip() if ind_col else None,
+                    region=str(row[reg_col]).strip() if reg_col else None
+                )
+                await new_recipient.insert()
                 count += 1
                 
-        db.commit()
         return {"filename": file.filename, "status": "success", "rows_added": count}
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing file: {str(e)}")
 
-@router.get("/recipients", response_model=list[schemas.Recipient])
-async def list_recipients(db: Session = Depends(get_db)):
-    return db.query(models.Recipient).order_by(models.Recipient.created_at.desc()).all()
+@router.get("/recipients", response_model=List[schemas.Recipient])
+async def list_recipients():
+    return await models.Recipient.find_all().sort("-created_at").to_list()

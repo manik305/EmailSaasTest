@@ -1,13 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app import models
-from app.database import engine
-from app.api import auth, campaign, data, config, chat, meetings
-
-# Initialize DB tables
-models.Base.metadata.create_all(bind=engine)
+from app.database import init_db
+from app.api import auth, campaign, data, config, chat, meetings, voice, social
 
 app = FastAPI(title="SaaS Email Campaign API")
+
+@app.on_event("startup")
+async def startup_event():
+    await init_db()
 
 # CORS for frontend dev server
 app.add_middleware(
@@ -24,6 +24,8 @@ app.include_router(data.router, prefix="/api/v1/data", tags=["Data"])
 app.include_router(config.router, prefix="/api/v1/config", tags=["Email Configuration"])
 app.include_router(chat.router, prefix="/api/v1/chat", tags=["Chat / AI Copilot"])
 app.include_router(meetings.router, prefix="/api/v1/meetings", tags=["Meeting Scheduler"])
+app.include_router(voice.router, prefix="/api/v1/voice", tags=["Voice Calling Agents"])
+app.include_router(social.router, prefix="/api/v1/social", tags=["Social Media Hub"])
 
 @app.get("/")
 async def root():

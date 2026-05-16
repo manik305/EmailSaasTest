@@ -1,49 +1,72 @@
-from sqlalchemy import Column, Integer, String, DateTime, JSON, Boolean, ForeignKey
-from sqlalchemy.orm import relationship
+from typing import List, Optional
 from datetime import datetime
-from .database import Base
+from beanie import Document, Indexed
+from pydantic import BaseModel, Field
 
-class Recipient(Base):
-    __tablename__ = "recipients"
+class Recipient(Document):
+    email: Indexed(str)
+    name: Optional[str] = None
+    designation: Optional[str] = None
+    department: Optional[str] = None
+    industry: Optional[str] = None
+    region: Optional[str] = None
+    status: str = "pending"  # pending, sent, bounced, replied
+    campaign_id: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
 
-    id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, index=True, nullable=False)
-    name = Column(String)
-    status = Column(String, default="pending")  # pending, sent, bounced, replied
-    campaign_id = Column(Integer, ForeignKey("campaigns.id"), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    class Settings:
+        name = "recipients"
 
-    campaign = relationship("Campaign", back_populates="recipients")
+class Campaign(Document):
+    name: str
+    target_segment: Optional[str] = None
+    schedule: Optional[str] = "Once"  # Daily, Weekly, Once
+    status: str = "draft"  # draft, active, completed, paused
+    smtp_config_id: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
 
-class Campaign(Base):
-    __tablename__ = "campaigns"
+    class Settings:
+        name = "campaigns"
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False)
-    target_segment = Column(String)
-    schedule = Column(String)  # Daily, Weekly, Once
-    status = Column(String, default="draft")  # draft, active, completed, paused
-    created_at = Column(DateTime, default=datetime.utcnow)
+class EmailConfig(Document):
+    provider: str  # google, microsoft, smtp
+    sender_address: str
+    settings_json: dict = {}  # host, port, username, password
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=datetime.utcnow)
 
-    recipients = relationship("Recipient", back_populates="campaign")
+    class Settings:
+        name = "email_configs"
 
-class EmailConfig(Base):
-    __tablename__ = "email_configs"
+class Meeting(Document):
+    title: str
+    date: str
+    time: str
+    attendee_email: str
+    meet_link: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
 
-    id = Column(Integer, primary_key=True, index=True)
-    provider = Column(String, nullable=False)  # google, microsoft, smtp
-    sender_address = Column(String, nullable=False)
-    settings_json = Column(JSON)  # Store host, port, etc.
-    is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    class Settings:
+        name = "meetings"
 
-class Meeting(Base):
-    __tablename__ = "meetings"
+class VoiceAgent(Document):
+    name: str
+    provider: str = "vapi"  # vapi, twilio
+    agent_id: str
+    phone_number: Optional[str] = None
+    status: str = "active"
+    created_at: datetime = Field(default_factory=datetime.utcnow)
 
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String)
-    date = Column(String)
-    time = Column(String)
-    attendee_email = Column(String)
-    meet_link = Column(String)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    class Settings:
+        name = "voice_agents"
+
+class SocialPost(Document):
+    platform: str  # linkedin, twitter, facebook
+    content: str
+    media_urls: List[str] = []
+    scheduled_for: Optional[datetime] = None
+    status: str = "draft"  # draft, scheduled, published, failed
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+    class Settings:
+        name = "social_posts"

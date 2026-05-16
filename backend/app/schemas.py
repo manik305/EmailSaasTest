@@ -1,22 +1,24 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ConfigDict
 from typing import List, Optional
 from datetime import datetime
 
 class RecipientBase(BaseModel):
     email: EmailStr
     name: Optional[str] = None
+    designation: Optional[str] = None
+    department: Optional[str] = None
+    industry: Optional[str] = None
+    region: Optional[str] = None
     status: str = "pending"
 
 class RecipientCreate(RecipientBase):
-    pass
+    campaign_id: Optional[str] = None
 
 class Recipient(RecipientBase):
-    id: int
-    campaign_id: Optional[int] = None
+    id: str
+    campaign_id: Optional[str] = None
     created_at: datetime
-
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class CampaignBase(BaseModel):
     name: str
@@ -27,12 +29,10 @@ class CampaignCreate(CampaignBase):
     pass
 
 class Campaign(CampaignBase):
-    id: int
+    id: str
     status: str
     created_at: datetime
-
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class CampaignMetrics(BaseModel):
     totalEmailsSent: int
@@ -50,8 +50,6 @@ class EmailConfigCreate(EmailConfigBase):
     pass
 
 class EmailConfig(EmailConfigBase):
-    id: int
+    id: str
     created_at: datetime
-
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
