@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 
-// Define the shape of our global state
-interface UploadedFile {
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+export interface UploadedFile {
   id: string;
   name: string;
   size: string;
@@ -9,28 +10,57 @@ interface UploadedFile {
   status: 'Processing' | 'Completed' | 'Failed';
 }
 
-interface Recipient {
+export interface Recipient {
   id: string;
   email: string;
   name?: string;
+  first_name?: string;
+  last_name?: string;
+  alternative_email?: string;
   designation?: string;
   department?: string;
+  company_name?: string;
+  website?: string;
+  linkedin_id?: string;
   industry?: string;
+  state?: string;
+  pin_code?: string;
+  country?: string;
   region?: string;
   status: string;
+  campaign_id?: string;
   created_at: string;
 }
 
-interface Campaign {
+export interface Campaign {
   id: string;
   name: string;
-  target_segment: string;
-  schedule: string;
+  target_segment?: string;
+  schedule?: string;
   status: string;
+  subject?: string;
+  body_template?: string;
+  send_at?: string;
+  email_config_id?: string;
   created_at: string;
 }
 
-interface EmailConfig {
+export interface EmailConfigSummary {
+  id: string;
+  name: string;
+  provider: string;
+  sender_address: string;
+  sender_name?: string;
+  is_active: boolean;
+  smtp_host?: string;
+  smtp_port?: number;
+  imap_host?: string;
+  imap_port?: number;
+  created_at: string;
+}
+
+// Legacy shape kept for backwards compat with EmailConfig.tsx page
+export interface EmailConfigLegacy {
   provider: 'Google Workspace' | 'Microsoft 365' | 'Custom SMTP' | null;
   status: 'Connected' | 'Disconnected';
   accountEmail?: string;
@@ -49,20 +79,33 @@ interface AppState {
   files: UploadedFile[];
   recipients: Recipient[];
   campaigns: Campaign[];
-  emailConfig: EmailConfig;
+  emailConfigs: EmailConfigSummary[];       // full list from /config
+  emailConfig: EmailConfigLegacy;           // legacy compat shape
   isLoading: boolean;
+}
+
+export interface CreateCampaignPayload {
+  name: string;
+  target_segment?: string;
+  schedule?: string;
+  subject?: string;
+  body_template?: string;
+  send_at?: string;
+  email_config_id?: string;
 }
 
 interface AppContextType {
   state: AppState;
   addFile: (file: UploadedFile) => void;
   uploadFileToBackend: (file: File) => Promise<void>;
-  createCampaign: (data: { name: string; target_segment: string; schedule: string }) => Promise<void>;
-  updateEmailConfig: (config: EmailConfig) => void;
+  createCampaign: (data: CreateCampaignPayload) => Promise<Campaign | null>;
+  updateEmailConfig: (config: EmailConfigLegacy) => void;
   refreshData: () => Promise<void>;
 }
 
-const API_BASE_URL = 'http://localhost:8000/api/v1';
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+export const API_BASE_URL = 'http://localhost:8000/api/v1';
 
 const initialState: AppState = {
   metrics: {
@@ -76,12 +119,12 @@ const initialState: AppState = {
   files: [],
   recipients: [],
   campaigns: [],
-  emailConfig: {
-    provider: null,
-    status: 'Disconnected',
-  },
+  emailConfigs: [],
+  emailConfig: { provider: null, status: 'Disconnected' },
   isLoading: false,
 };
+
+// ─── Context ──────────────────────────────────────────────────────────────────
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
@@ -95,32 +138,35 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         fetch(`${API_BASE_URL}/campaigns/metrics`),
         fetch(`${API_BASE_URL}/data/recipients`),
         fetch(`${API_BASE_URL}/campaigns/`),
-        fetch(`${API_BASE_URL}/config/`)
+        fetch(`${API_BASE_URL}/config/`),
       ]);
 
-      const metrics = await metricsRes.json();
-      const recipients = await recipientsRes.json();
-      const campaigns = await campaignsRes.json();
-      const configs = await configsRes.json();
+      const metrics: AppState['metrics']           = await metricsRes.json();
+      const recipients: Recipient[]                 = await recipientsRes.json();
+      const campaigns: Campaign[]                   = await campaignsRes.json();
+      const emailConfigs: EmailConfigSummary[]      = await configsRes.json();
 
-      const activeConfig = configs.find((c: any) => c.is_active);
+      const activeConfig = emailConfigs.find(c => c.is_active);
 
       setState(prev => ({
         ...prev,
         metrics: {
           ...prev.metrics,
           ...metrics,
-          activeCampaigns: campaigns.filter((c: any) => c.status === 'active').length
+          activeCampaigns: campaigns.filter(c => c.status === 'active').length,
         },
         recipients,
         campaigns,
-        emailConfig: activeConfig ? {
-          provider: activeConfig.provider,
-          status: 'Connected',
-          accountEmail: activeConfig.sender_address,
-          lastSync: new Date(activeConfig.created_at).toLocaleTimeString()
-        } : prev.emailConfig,
-        isLoading: false
+        emailConfigs,
+        emailConfig: activeConfig
+          ? {
+              provider: activeConfig.provider as any,
+              status: 'Connected',
+              accountEmail: activeConfig.sender_address,
+              lastSync: new Date(activeConfig.created_at).toLocaleTimeString(),
+            }
+          : prev.emailConfig,
+        isLoading: false,
       }));
     } catch (error) {
       console.error('Failed to fetch app data:', error);
@@ -132,46 +178,51 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     refreshData();
   }, [refreshData]);
 
-  const addFile = (file: UploadedFile) => {
-    setState((prevState) => ({
-      ...prevState,
-      files: [file, ...prevState.files],
-    }));
-  };
+  // ─── Actions ────────────────────────────────────────────────────────────────
+
+  const addFile = (file: UploadedFile) =>
+    setState(prev => ({ ...prev, files: [file, ...prev.files] }));
 
   const uploadFileToBackend = async (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
-
     try {
-      const response = await fetch(`${API_BASE_URL}/data/upload`, {
-        method: 'POST',
-        body: formData,
-      });
-      if (response.ok) {
-        await refreshData();
-      }
-    } catch (error) {
-      console.error('Upload failed:', error);
+      const res = await fetch(`${API_BASE_URL}/data/upload`, { method: 'POST', body: formData });
+      if (res.ok) await refreshData();
+    } catch (err) {
+      console.error('Upload failed:', err);
     }
   };
 
-  const createCampaign = async (data: { name: string; target_segment: string; schedule: string }) => {
+  const createCampaign = async (data: CreateCampaignPayload): Promise<Campaign | null> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/campaigns/`, {
+      const res = await fetch(`${API_BASE_URL}/campaigns/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (response.ok) {
-        await refreshData();
+      if (!res.ok) {
+        console.error('Campaign creation failed:', await res.text());
+        return null;
       }
-    } catch (error) {
-      console.error('Campaign creation failed:', error);
+      const created: Campaign = await res.json();
+      // Optimistic update — prepend to list immediately
+      setState(prev => ({
+        ...prev,
+        campaigns: [created, ...prev.campaigns],
+        metrics: {
+          ...prev.metrics,
+          activeCampaigns: prev.metrics.activeCampaigns + (created.status === 'active' ? 1 : 0),
+        },
+      }));
+      return created;
+    } catch (err) {
+      console.error('Campaign creation error:', err);
+      return null;
     }
   };
 
-  const updateEmailConfig = async (config: EmailConfig) => {
+  const updateEmailConfig = async (config: EmailConfigLegacy) => {
     try {
       if (config.provider && config.accountEmail) {
         await fetch(`${API_BASE_URL}/config/`, {
@@ -181,28 +232,27 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             provider: config.provider,
             sender_address: config.accountEmail,
             settings_json: {},
-            is_active: true
+            is_active: true,
           }),
         });
       }
-      // Refresh local state
       await refreshData();
-    } catch (error) {
-      console.error('Failed to update email config:', error);
+    } catch (err) {
+      console.error('Failed to update email config:', err);
     }
   };
 
   return (
-    <AppContext.Provider value={{ state, addFile, uploadFileToBackend, createCampaign, updateEmailConfig, refreshData }}>
+    <AppContext.Provider
+      value={{ state, addFile, uploadFileToBackend, createCampaign, updateEmailConfig, refreshData }}
+    >
       {children}
     </AppContext.Provider>
   );
 };
 
 export const useAppContext = () => {
-  const context = useContext(AppContext);
-  if (context === undefined) {
-    throw new Error('useAppContext must be used within an AppProvider');
-  }
-  return context;
+  const ctx = useContext(AppContext);
+  if (!ctx) throw new Error('useAppContext must be used within an AppProvider');
+  return ctx;
 };

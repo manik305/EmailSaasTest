@@ -56,19 +56,26 @@ This application is an all-in-one CRM and Sales Pipeline automation tool designe
 - Refactored `main.py` and `database.py` for consistent async startup and initialization.
 - Expanded `Recipient` model and data upload logic to support the full lead data requirements.
 
+### Iteration 7: Combined Campaign Config, Timezone Scheduling, Excel Validation & Bounce/Inbox Overhaul
+- **Combined Email Config**: Removed the standalone configuration screens and fully integrated SMTP/IMAP setups directly into the Campaign panel workspace.
+- **13-Header Excel/CSV Validation Engine**: Implemented robust campaign-level bulk lead data import supporting `.xlsx`, `.xls`, and `.csv` files with a strict, trimmed, case-insensitive 13-header validation engine.
+- **APAC & World-Wide Timezone Scheduler**: Added comprehensive region-by-country timezone selector (APAC, US/Canada, Latin America, Europe, Africa, Middle East) that auto-translates scheduled campaign times to UTC.
+- **Resilient Bounce Aggregator & Fallbacks**: Integrated dynamic "Delivery Status Notification (Failure)" synthesis inside the `/inbox` API endpoint when recipients bounce. Added graceful database fallbacks so unconfigured IMAP settings do not crash the view.
+- **Interactive Monospace Console Email Reader**: Built an interactive full email details view inside the Frontend React `CampaignPanels` Inbox tab with a monospace, preserved-whitespace console container and sleek back-navigation.
+- **Type-Safe Full-Stack Delivery**: Eliminated TypeScript build warnings and verified FastAPI backend service compile logs.
+
 ---
 
 ## 🏗 Architecture Summary
 
 - **Frontend**: Vite + React (TypeScript) + Tailwind CSS/Vanilla CSS.
-- **Backend**: FastAPI (Python 3.9+).
+- **Backend**: FastAPI (Python 3.11).
 - **Database**: MongoDB Atlas (Beanie/Motor).
 - **External Services**: SMTP (Email Out), IMAP (Email In), Vapi (Voice), LinkedIn API (Social).
 
 ---
 
 ## 📝 Roadmap & Pending Tasks
-1. **IMAP Performance**: Move IMAP fetching to a background task with MongoDB caching to improve UI responsiveness.
-2. **Social Media OAuth**: Finalize the authentication flow for LinkedIn/Facebook publishing.
-3. **Draft Persistence**: Implement UI-to-API logic to save sub-campaign specific email drafts into MongoDB.
-4. **Sub-folder Management**: Enable dynamic creation of sub-folders within the Campaign Drafts view.
+1. **Social Media OAuth**: Finalize the authentication flow for LinkedIn/Facebook publishing.
+2. **Dynamic Calling Agents**: Integrate live Vapi voice agents inside the calling tab interfaces.
+3. **Analytics Dashboard Drill-downs**: Add visual charts to view delivery, opens, clicks, and bounce statistics dynamically per campaign.

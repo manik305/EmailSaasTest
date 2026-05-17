@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-do
 import DashboardPage from './pages/Dashboard';
 import CampaignsPage from './pages/Campaigns';
 import DataFolderPage from './pages/DataFolder';
-import EmailConfigPage from './pages/EmailConfig';
 import LoginPage from './pages/Login';
 import LandingPageFeature from './pages/LandingPage';
 import MeetingScheduler from './pages/MeetingScheduler';
@@ -25,11 +24,6 @@ const navIcons: Record<string, React.ReactNode> = {
   '/data-folder': (
     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-    </svg>
-  ),
-  '/email-config': (
-    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
     </svg>
   ),
   '/voice-manager': (
@@ -58,14 +52,13 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
 
   const navItems = [
-    { name: 'Dashboard', path: '/dashboard' },
-    { name: 'Campaigns', path: '/campaigns' },
-    { name: 'Data Management', path: '/data-folder' },
-    { name: 'Voice Manager', path: '/voice-manager' },
-    { name: 'Social Hub', path: '/social-media' },
-    { name: 'Email Config', path: '/email-config' },
-    { name: 'Meetings', path: '/meetings' },
-    { name: 'Landing Pages', path: '/landing-pages' },
+    { name: 'Dashboard',       path: '/dashboard' },
+    { name: 'Campaigns',        path: '/campaigns' },
+    { name: 'Data Management',  path: '/data-folder' },
+    { name: 'Voice Manager',    path: '/voice-manager' },
+    { name: 'Social Hub',       path: '/social-media' },
+    { name: 'Meetings',         path: '/meetings' },
+    { name: 'Landing Pages',    path: '/landing-pages' },
   ];
 
   return (
@@ -125,13 +118,12 @@ const App: React.FC = () => {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LoginPage />} />
-        <Route path="/dashboard" element={<Layout><DashboardPage /></Layout>} />
-        <Route path="/campaigns" element={<Layout><CampaignsPage /></Layout>} />
-        <Route path="/data-folder" element={<Layout><DataFolderPage /></Layout>} />
-        <Route path="/email-config" element={<Layout><EmailConfigPage /></Layout>} />
-        <Route path="/landing-pages" element={<Layout><LandingPageFeature /></Layout>} />
-        <Route path="/meetings" element={<Layout><MeetingScheduler /></Layout>} />
-        <Route path="/voice-manager" element={<Layout><VoiceManager /></Layout>} />
+        <Route path="/dashboard"    element={<Layout><DashboardPage /></Layout>} />
+        <Route path="/campaigns"    element={<Layout><CampaignsPage /></Layout>} />
+        <Route path="/data-folder"  element={<Layout><DataFolderPage /></Layout>} />
+        <Route path="/landing-pages"element={<Layout><LandingPageFeature /></Layout>} />
+        <Route path="/meetings"     element={<Layout><MeetingScheduler /></Layout>} />
+        <Route path="/voice-manager"element={<Layout><VoiceManager /></Layout>} />
         <Route path="/social-media" element={<Layout><SocialMedia /></Layout>} />
       </Routes>
     </BrowserRouter>
